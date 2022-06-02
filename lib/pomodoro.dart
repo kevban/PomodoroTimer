@@ -23,6 +23,8 @@ class _PomodoroState extends State<Pomodoro> {
     });});
   }
 
+
+
   void disposeTimer() {
     _pomTimer.cancel();
   }
@@ -33,6 +35,14 @@ class _PomodoroState extends State<Pomodoro> {
     });
   }
 
+  void addTime(int minutes) {
+    if (timerState.getTimerType() == "Work") {
+      setting.minutesPerDay.update(dateTimeToInt(DateTime.now()), (value) => value + minutes, ifAbsent: ()=> minutes);
+    }
+    print (minutes);
+    setting.lastTimerMinute = minutes;
+  }
+
   List<Widget> timerButtons () {
     List<Widget> buttonsToReturn = [];
     if (timerState.isTimerStarted()) {
@@ -41,35 +51,52 @@ class _PomodoroState extends State<Pomodoro> {
           timerState.continueTimer();
           startTimer();
           setState(() {});
-        }, child: Text('Resume')));
+        }, child: const Text('Resume')));
         buttonsToReturn.add(ElevatedButton(onPressed: (){
+          addTime((timerState.secondsElapsed()/60).floor());
           timerState.stopTimer();
           secondsElapsed = 0;
           disposeTimer();
           changeTimerType();
           getTimerType();
-          setState(() {});}, child: Text('Stop')));
+          setState(() {});}, child: const Text('Stop')));
       } else {
         buttonsToReturn.add(ElevatedButton(onPressed: (){
           timerState.pauseTimer();
           setState(() {});
           disposeTimer();
-          setState(() {});}, child: Text('Pause')));
+          setState(() {});}, child: const Text('Pause')));
         buttonsToReturn.add(ElevatedButton(onPressed: (){
+          addTime((timerState.secondsElapsed()/60).floor());
           timerState.stopTimer();
           secondsElapsed = 0;
           disposeTimer();
           changeTimerType();
           getTimerType();
-          setState(() {});}, child: Text('Stop')));
+          setState(() {});}, child: const Text('Stop')));
       }
     } else {
       buttonsToReturn.add(ElevatedButton(onPressed: (){
         timerState.startTimer();
         startTimer();
-        setState(() {});}, child: Text('Start')));
+        setState(() {});}, child: const Text('Start')));
     }
     return buttonsToReturn;
+  }
+
+  Widget timeSuggestion() {
+    if (setting.suggestionEnabled) {
+      if (setting.lastTimerMinute >= 0) {
+        if (timerState.getTimerType() == "Work") {
+          return Text("Suggested work time: ${setting.lastTimerMinute * setting.getWorkBreakRatio(-1)} min");
+        } else {
+          return Text("Suggested break time: ${(setting.lastTimerMinute / setting.getWorkBreakRatio(-1)).round()} min");
+        }
+      } else {
+        return const Text("This is your first work timer of the day. Fight on!");
+      }
+    }
+    return const SizedBox();
   }
 
   //Change timer color scheme based on the type
@@ -94,22 +121,35 @@ class _PomodoroState extends State<Pomodoro> {
 
   @override
   void initState() {
-    secondsElapsed = timerState.secondsElapsed();
     getTimerType();
+    if (timerState.isTimerStarted()) {
+      secondsElapsed = timerState.secondsElapsed();
+      if (!timerState.isTimerPaused()) {
+        startTimer();
+      }
+    } else {
+      secondsElapsed = 0;
+    }
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    disposeTimer();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pomodoro'),
+        title: const Text('Pomodoro'),
         centerTitle: true,
       ),
       drawer: buildDrawer(context),
       body: Column(
         children: [
-          SizedBox(height: 120,),
+          const SizedBox(height: 120,),
           Center(
               child: Text(
                 timerState.getTimerType(),
@@ -120,7 +160,7 @@ class _PomodoroState extends State<Pomodoro> {
                 ),
               )
           ),
-          SizedBox(height: 20,),
+          const SizedBox(height: 20,),
           Center(
             child:Text(
               secondsToString(secondsElapsed),
@@ -131,7 +171,9 @@ class _PomodoroState extends State<Pomodoro> {
               ),
             )
           ),
-          SizedBox(height: 20,),
+          const SizedBox(height: 20,),
+          timeSuggestion(),
+          const SizedBox(height: 20,),
           Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'library.dart';
 import 'dart:math';
+import 'package:json_annotation/json_annotation.dart';
+part 'settings.g.dart';
 
 double roundDouble(double value, int places){
   num mod = pow(10.0, places);
@@ -18,6 +20,12 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   bool targetPickerOpened = false;
   bool suggestionPickerOpened = false;
+
+  @override
+  void dispose() {
+    saveData();
+    super.dispose();
+  }
 
   Widget showSettings(String settingDetail, bool enable) {
     if (enable) {
@@ -150,12 +158,20 @@ class _SettingsState extends State<Settings> {
   }
 }
 
+@JsonSerializable()
 class Setting {
+  // user settings
   bool dailyEnabled = true;
   bool suggestionEnabled = true;
   int targetMinPerPoint = 0; // index in picker
   int workBreakRatio = 4; // index in picker
   int targetScrollIndex = 0;
+  // app statistics
+  int today = 0; // the date of today in yyyymmdd
+  Map<int, int> minutesPerDay = {};
+  int lastTimerMinute = 0; // the minute elapsed in prior timer
+
+  Setting() {}
 
   // pass in -1 to get the current
   double getWorkBreakRatio(int index) {
@@ -184,6 +200,10 @@ class Setting {
     }
 
   }
+
+  factory Setting.fromJson(Map<String, dynamic> json) => _$SettingFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SettingToJson(this);
 }
 
 

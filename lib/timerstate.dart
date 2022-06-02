@@ -44,7 +44,6 @@ class TimerState {
   // start the timer
   void startTimer() {
     if (!_timerStarted) {
-      print("Started timer");
       _timerStarted = true;
       _startTime = DateTime.now();
       saveData();
@@ -54,7 +53,6 @@ class TimerState {
   // pause the current active timer
   void pauseTimer() {
     if (!_timerPaused && _timerStarted) {
-      print("Paused timer");
       _timerPaused = true;
       _pauseTime = DateTime.now();
       saveData();
@@ -64,17 +62,15 @@ class TimerState {
   //continue the timer if paused
   void continueTimer() {
     if (_timerPaused) {
-      print("Resumed timer");
       _timerPaused = false;
       _secondsSpentPaused = -_pauseTime.difference(DateTime.now()).inSeconds;
       saveData();
     }
   }
 
-  //stops and reinitialize the timer
+  //stops and reinitialize the timer. Export the result to timesheet
   void stopTimer() {
     if (_timerStarted) {
-      print("Stopped timer");
       _timerStarted = false;
       _timerPaused = false;
       _startTime = DateTime.now();
