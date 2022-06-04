@@ -88,14 +88,13 @@ class TimerState {
 
   void changeTimerType(String timerType) {
     this.timerType = timerType;
-    print ("timer type changed to ${timerType}");
     saveData();
   }
 
   void timerDebug() {
     print ("-------------------------------------------");
-    print ("Timer Started: ${startTime}");
-    print ("Timer paused: ${pauseTime}");
+    print ("Timer Started: $startTime");
+    print ("Timer paused: $pauseTime");
     print ("Timer now: ${DateTime.now()}");
     print ("Seconds elapsed: ${secondsElapsed()}");
     print ("Timer type: ${getTimerType()}");

@@ -15,7 +15,6 @@ class _LandingState extends State<Landing> {
   @override
   Widget build(BuildContext context) {
     Timer.periodic(Duration(milliseconds: 10), (timer) {
-      print ('checking');
       if (setting.loaded) {
         timer.cancel();
         Navigator.pushReplacement(context, MaterialPageRoute<void>(

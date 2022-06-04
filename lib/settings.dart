@@ -161,7 +161,7 @@ class _SettingsState extends State<Settings> {
             title: Row(
               children: const [
                 Icon(Icons.refresh, color: Colors.red,),
-                Text("   Reset",style: TextStyle(color: Colors.red),)
+                Text("   Hold to reset",style: TextStyle(color: Colors.red),)
               ],
             ),
             trailing: const Icon(Icons.arrow_right_outlined),
@@ -193,6 +193,7 @@ class Setting {
   Map<int, int> minutesPerDay = {};
   int lastTimerMinute = 0; // the minute elapsed in prior timer
   bool loaded = false; //a variable that becomes true when loadData() is finished
+  double suggestedMin = 0;
 
   Setting() {}
 

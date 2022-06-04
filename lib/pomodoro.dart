@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:math';
 import 'timerstate.dart';
 import 'library.dart';
+import 'package:pomodorot/notification.dart';
 
 class Pomodoro extends StatefulWidget {
   const Pomodoro({Key? key}) : super(key: key);
@@ -60,12 +61,22 @@ class _PomodoroState extends State<Pomodoro> {
           disposeTimer();
           changeTimerType();
           getTimerType();
+          NotificationAPI().cancelAllNotification();
           setState(() {});}, child: const Text('Stop')));
       } else {
         buttonsToReturn.add(ElevatedButton(onPressed: (){
           timerState.pauseTimer();
           setState(() {});
           disposeTimer();
+          NotificationAPI().cancelAllNotification();
+          int minutesElapsed = (timerState.secondsElapsed() / 60).round();
+          print ("remaining minutes: ${(setting.suggestedMin - minutesElapsed).round()}");
+          if ((setting.suggestedMin - minutesElapsed).round() > 0) {
+            NotificationAPI.showScheduledNotification(
+                title: 'Pomodorot',
+                body: 'You have reached ${setting.suggestedMin} of your ${timerState.getTimerType()} time',
+                scheduledDate: DateTime.now().add(Duration(minutes: (setting.suggestedMin - minutesElapsed).round())));
+          }
           setState(() {});}, child: const Text('Pause')));
         buttonsToReturn.add(ElevatedButton(onPressed: (){
           addTime((timerState.secondsElapsed()/60).floor());
@@ -74,12 +85,18 @@ class _PomodoroState extends State<Pomodoro> {
           disposeTimer();
           changeTimerType();
           getTimerType();
+          NotificationAPI().cancelAllNotification();
           setState(() {});}, child: const Text('Stop')));
       }
     } else {
       buttonsToReturn.add(ElevatedButton(onPressed: (){
         timerState.startTimer();
-        scheduleAlarm();
+        if (setting.suggestedMin > 0) {
+          NotificationAPI.showScheduledNotification(
+              title: 'Pomodorot',
+              body: 'You have reached ${setting.suggestedMin} of your ${timerState.getTimerType()} time',
+              scheduledDate: DateTime.now().add(Duration(minutes: setting.suggestedMin.round())));
+        }
         startTimer();
         setState(() {});}, child: const Text('Start')));
     }
@@ -90,13 +107,14 @@ class _PomodoroState extends State<Pomodoro> {
     if (setting.suggestionEnabled) {
       if (setting.lastTimerMinute >= 0) {
         if (timerState.getTimerType() == "Work") {
-          return Text("Suggested work time: ${setting.lastTimerMinute * setting.getWorkBreakRatio(-1)} min");
+          setting.suggestedMin = setting.lastTimerMinute * setting.getWorkBreakRatio(-1);
         } else {
-          return Text("Suggested break time: ${(setting.lastTimerMinute / setting.getWorkBreakRatio(-1)).round()} min");
+          setting.suggestedMin = setting.lastTimerMinute / setting.getWorkBreakRatio(-1).round();
         }
       } else {
         return const Text("This is your first work timer of the day. Fight on!");
       }
+      return Text("Suggested ${timerState.getTimerType()} time: ${setting.suggestedMin} min");
     }
     return const SizedBox();
   }
@@ -121,6 +139,13 @@ class _PomodoroState extends State<Pomodoro> {
     }
   }
 
+  void listenNotifications() => NotificationAPI.onNotifications.stream.listen((onClickedNotification));
+
+      void onClickedNotification(String? payload) =>
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => const Pomodoro(),
+          ));
+
   @override
   void initState() {
     getTimerType();
@@ -132,7 +157,8 @@ class _PomodoroState extends State<Pomodoro> {
     } else {
       secondsElapsed = 0;
     }
-    timerState.timerDebug();
+    NotificationAPI.init(initScheduled: true);
+    listenNotifications();
     super.initState();
   }
 
