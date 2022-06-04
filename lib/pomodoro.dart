@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pomodorot/main.dart';
 import 'dart:async';
 import 'dart:math';
 import 'timerstate.dart';
@@ -78,6 +79,7 @@ class _PomodoroState extends State<Pomodoro> {
     } else {
       buttonsToReturn.add(ElevatedButton(onPressed: (){
         timerState.startTimer();
+        scheduleAlarm();
         startTimer();
         setState(() {});}, child: const Text('Start')));
     }
@@ -130,6 +132,7 @@ class _PomodoroState extends State<Pomodoro> {
     } else {
       secondsElapsed = 0;
     }
+    timerState.timerDebug();
     super.initState();
   }
 

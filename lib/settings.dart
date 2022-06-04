@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'library.dart';
+import 'timerstate.dart';
 import 'dart:math';
 import 'package:json_annotation/json_annotation.dart';
 part 'settings.g.dart';
@@ -131,7 +132,7 @@ class _SettingsState extends State<Settings> {
           ),
           showSettings("target", setting.dailyEnabled),
           showSettings("minSelect", targetPickerOpened),
-          Divider(
+          const Divider(
             indent: 10,
             endIndent: 10,
           ),
@@ -152,6 +153,27 @@ class _SettingsState extends State<Settings> {
           ),
           showSettings("suggest", setting.suggestionEnabled),
           showSettings("suggestSelect", suggestionPickerOpened),
+          const Divider(
+            indent: 10,
+            endIndent: 10,
+          ),
+          ListTile(
+            title: Row(
+              children: const [
+                Icon(Icons.refresh, color: Colors.red,),
+                Text("   Reset",style: TextStyle(color: Colors.red),)
+              ],
+            ),
+            trailing: const Icon(Icons.arrow_right_outlined),
+            onLongPress: () {
+              timerState = TimerState();
+              setting = Setting();
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text('Data reset complete'),
+              ),);
+              saveData();
+            },
+          ),
         ],
       ),
     );
@@ -170,6 +192,7 @@ class Setting {
   int today = 0; // the date of today in yyyymmdd
   Map<int, int> minutesPerDay = {};
   int lastTimerMinute = 0; // the minute elapsed in prior timer
+  bool loaded = false; //a variable that becomes true when loadData() is finished
 
   Setting() {}
 

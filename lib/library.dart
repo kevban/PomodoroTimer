@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'timerstate.dart';
@@ -56,21 +57,27 @@ void saveData() async {
   prefs.setString('timer', json);
   json = jsonEncode(setting);
   prefs.setString('setting', json);
+  print ("data saved");
 }
 
 void loadData() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   if (prefs.getString("timer") != null)  {
+    print ("timer loaded");
     String json = prefs.getString("timer")!;
     Map<String, dynamic> map = jsonDecode(json);
     timerState = TimerState.fromJson(map);
   }
   if (prefs.getString("setting") != null)  {
+    print ("setting loaded");
     String json = prefs.getString("setting")!;
     Map<String, dynamic> map = jsonDecode(json);
     setting = Setting.fromJson(map);
   }
+  setting.loaded = true;
 }
+
+
 
 int dateTimeToInt (DateTime dateTime) {
   return dateTime.year * 10000 + dateTime.month*100 + dateTime.day;

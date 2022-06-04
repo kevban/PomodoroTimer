@@ -1,87 +1,104 @@
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pomodorot/library.dart';
 part 'timerstate.g.dart';
 
 @JsonSerializable()
 class TimerState {
-  bool _timerStarted = false;
-  bool _timerPaused = false;
-  String _timerType = "Work"; //can be "Work", "Break"
-  DateTime _startTime = DateTime.now();
-  DateTime _pauseTime = DateTime.now();
-  int _secondsSpentPaused = 0; //tracks the number of seconds paused
+  bool timerStarted = false;
+  bool timerPaused = false;
+  String timerType = "Work"; //can be "Work", "Break"
+  DateTime startTime = DateTime.now();
+  DateTime pauseTime = DateTime.now();
 
   //flutter packages pub run build_runner build
   TimerState() {}
 
 
-  ///Get functions
   //return if the timer is currently running
   bool isTimerStarted() {
-    return _timerStarted;
+    return timerStarted;
   }
 
   //return if the timer is currently paused
   bool isTimerPaused() {
-    return _timerPaused;
+    return timerPaused;
   }
 
   // returns the seconds elapsed using the startDate
   int secondsElapsed() {
-    if (_timerStarted) {
-      return -_startTime.difference(DateTime.now()).inSeconds - _secondsSpentPaused;
+    if (timerStarted) {
+      if (timerPaused) {
+        return -startTime.difference(pauseTime).inSeconds;
+      } else {
+        return -startTime.difference(DateTime.now()).inSeconds;
+      }
     } else {
       return -1;
     }
   }
 
   String getTimerType() {
-    return _timerType;
+    return timerType;
   }
 
   /// Set functions
 
   // start the timer
   void startTimer() {
-    if (!_timerStarted) {
-      _timerStarted = true;
-      _startTime = DateTime.now();
+    if (!timerStarted) {
+      timerStarted = true;
+      startTime = DateTime.now();
       saveData();
     }
+    //timerDebug();
   }
 
   // pause the current active timer
   void pauseTimer() {
-    if (!_timerPaused && _timerStarted) {
-      _timerPaused = true;
-      _pauseTime = DateTime.now();
+    if (!timerPaused && timerStarted) {
+      timerPaused = true;
+      pauseTime = DateTime.now();
       saveData();
     }
+    //timerDebug();
   }
 
   //continue the timer if paused
   void continueTimer() {
-    if (_timerPaused) {
-      _timerPaused = false;
-      _secondsSpentPaused = -_pauseTime.difference(DateTime.now()).inSeconds;
+    if (timerPaused) {
+      Duration duration = pauseTime.difference(DateTime.now());
+      timerPaused = false;
+      startTime = startTime.subtract(duration);
       saveData();
     }
+    //timerDebug();
   }
 
   //stops and reinitialize the timer. Export the result to timesheet
   void stopTimer() {
-    if (_timerStarted) {
-      _timerStarted = false;
-      _timerPaused = false;
-      _startTime = DateTime.now();
-      _pauseTime = DateTime.now();
+    if (timerStarted) {
+      timerStarted = false;
+      timerPaused = false;
+      startTime = DateTime.now();
+      pauseTime = DateTime.now();
       saveData();
     }
   }
 
   void changeTimerType(String timerType) {
-    _timerType = timerType;
+    this.timerType = timerType;
+    print ("timer type changed to ${timerType}");
     saveData();
+  }
+
+  void timerDebug() {
+    print ("-------------------------------------------");
+    print ("Timer Started: ${startTime}");
+    print ("Timer paused: ${pauseTime}");
+    print ("Timer now: ${DateTime.now()}");
+    print ("Seconds elapsed: ${secondsElapsed()}");
+    print ("Timer type: ${getTimerType()}");
   }
 
   factory TimerState.fromJson(Map<String, dynamic> json) => _$TimerStateFromJson(json);
