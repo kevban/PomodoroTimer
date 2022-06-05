@@ -17,7 +17,8 @@ Setting _$SettingFromJson(Map<String, dynamic> json) => Setting()
     (k, e) => MapEntry(int.parse(k), e as int),
   )
   ..lastTimerMinute = json['lastTimerMinute'] as int
-  ..loaded = json['loaded'] as bool;
+  ..loaded = json['loaded'] as bool
+  ..suggestedMin = (json['suggestedMin'] as num).toDouble();
 
 Map<String, dynamic> _$SettingToJson(Setting instance) => <String, dynamic>{
       'dailyEnabled': instance.dailyEnabled,
@@ -30,4 +31,5 @@ Map<String, dynamic> _$SettingToJson(Setting instance) => <String, dynamic>{
           instance.minutesPerDay.map((k, e) => MapEntry(k.toString(), e)),
       'lastTimerMinute': instance.lastTimerMinute,
       'loaded': instance.loaded,
+      'suggestedMin': instance.suggestedMin,
     };

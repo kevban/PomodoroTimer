@@ -52,6 +52,17 @@ class _PomodoroState extends State<Pomodoro> {
         buttonsToReturn.add(ElevatedButton(onPressed: (){
           timerState.continueTimer();
           startTimer();
+          if (setting.suggestionEnabled) {
+            int minutesElapsed = (timerState.secondsElapsed() / 60).round();
+            print ("remaining minutes: ${(setting.suggestedMin - minutesElapsed).round()}");
+            if ((setting.suggestedMin - minutesElapsed).round() > 0) {
+              NotificationAPI.showScheduledNotification(
+                  title: 'Pomodorot',
+                  body: 'You have reached ${setting.suggestedMin} min of your suggested ${timerState.getTimerType()} time',
+                  scheduledDate: DateTime.now().add(Duration(minutes: (setting.suggestedMin - minutesElapsed).round())));
+            }
+          }
+
           setState(() {});
         }, child: const Text('Resume')));
         buttonsToReturn.add(ElevatedButton(onPressed: (){
@@ -69,14 +80,6 @@ class _PomodoroState extends State<Pomodoro> {
           setState(() {});
           disposeTimer();
           NotificationAPI().cancelAllNotification();
-          int minutesElapsed = (timerState.secondsElapsed() / 60).round();
-          print ("remaining minutes: ${(setting.suggestedMin - minutesElapsed).round()}");
-          if ((setting.suggestedMin - minutesElapsed).round() > 0) {
-            NotificationAPI.showScheduledNotification(
-                title: 'Pomodorot',
-                body: 'You have reached ${setting.suggestedMin} of your ${timerState.getTimerType()} time',
-                scheduledDate: DateTime.now().add(Duration(minutes: (setting.suggestedMin - minutesElapsed).round())));
-          }
           setState(() {});}, child: const Text('Pause')));
         buttonsToReturn.add(ElevatedButton(onPressed: (){
           addTime((timerState.secondsElapsed()/60).floor());
@@ -91,11 +94,13 @@ class _PomodoroState extends State<Pomodoro> {
     } else {
       buttonsToReturn.add(ElevatedButton(onPressed: (){
         timerState.startTimer();
-        if (setting.suggestedMin > 0) {
-          NotificationAPI.showScheduledNotification(
-              title: 'Pomodorot',
-              body: 'You have reached ${setting.suggestedMin} of your ${timerState.getTimerType()} time',
-              scheduledDate: DateTime.now().add(Duration(minutes: setting.suggestedMin.round())));
+        if (setting.suggestionEnabled) {
+          if (setting.suggestedMin > 0) {
+            NotificationAPI.showScheduledNotification(
+                title: 'Pomodorot',
+                body: 'You have reached ${setting.suggestedMin} min of your suggested ${timerState.getTimerType()} time',
+                scheduledDate: DateTime.now().add(Duration(minutes: setting.suggestedMin.round())));
+          }
         }
         startTimer();
         setState(() {});}, child: const Text('Start')));
@@ -236,5 +241,6 @@ String secondsToString(int secondsElapsed) {
 
 
 }
+
 
 

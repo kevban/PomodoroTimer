@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:pomodorot/library.dart';
 import 'pomodoro.dart';
 import 'settings.dart';
@@ -13,7 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     loadData();
-  } on Exception catch (exception) {
+  } on DisallowedNullValueException catch (e) {
     setting.loaded = true;
   } catch (error) {
     setting.loaded = true;
